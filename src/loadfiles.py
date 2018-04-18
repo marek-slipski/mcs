@@ -1,5 +1,8 @@
 import pandas as pd
 import numpy as np
+import sys
+
+#### READ AND COMBINE FUNCTIONS
 
 def read(mcs_file,profn0=0):
     '''
@@ -106,14 +109,12 @@ def combine(filelist):
     meta = pd.concat(meta_pieces,ignore_index=True)
     return data, meta
 
+#############################################################
+#############################################################
 
-if __name__=='__main__':
-    import sys
-    with open(sys.argv[1],'rb') as infile:
-        files = [x.rstrip() for x in infile.readlines()]
-        
-    ddf, mdf = combine(files)
-    
-    print mdf.tail()
-    
-    print ddf.tail()
+# OPEN FILES AND COMBINE
+with open(sys.argv[1],'rb') as infile:
+    files = [x.rstrip() for x in infile.readlines()]
+
+ddf, mdf = combine(files)
+
