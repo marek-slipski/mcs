@@ -1,14 +1,5 @@
-#! bin/env/ python
-from pandas import DataFrame, Series
 import pandas as pd
 import numpy as np
-import datetime as dt
-import os
-import sys
-
-
-### Need to add Orb_Prof into data DF. Maybe create 105x1 and joining along
-#vertical axis??
 
 def read(mcs_file,profn0=0):
     '''
@@ -80,7 +71,7 @@ def read(mcs_file,profn0=0):
             mcs_file,skiprows=skips,header=0,delimiter=',',
             skipinitialspace=True,na_values=-9999)
     #meta-data for each profile
-    meta_df = DataFrame(date_info,columns=date_cols)
+    meta_df = pd.DataFrame(date_info,columns=date_cols)
     #deal with empty and NaNs
     meta_df = meta_df.replace('',np.NaN)
     meta_df = meta_df.replace('-9999',np.NaN)
@@ -92,40 +83,37 @@ def read(mcs_file,profn0=0):
 
     return df, meta_df
 
-def save_data(filename):
-    datafile = filename.split('/')
-    filenamesplit = datafile[-1].split('_')
-    ymdh = filenamesplit[0]
-    ystr = ymdh[0:4]
-    mstr = ymdh[4:6]
-    dstr = ymdh[6:8]
-    hstr = ymdh[8:10]
-    data,meta = read(filename)
-    proc_base = 'data/processed/mcs/mrom_2/'
-    proc_path = proc_base+ystr+'/'+ystr+mstr+'/'+ystr+mstr+dstr+'/'
-    meta_path = proc_path + 'meta/'
-    data_path = proc_path + 'data/'
+def combine(filelist):
+    '''
+    Generate dataframes for data and metadata from one or more files
+    
+    Inputs
+    ------
+    filelist: list, list of files to read
+    
+    Outputs
+    -------
+    data: DataFrame, all profiles
+    meta: DataFrame, meta data for each profile
+    '''
+    profn = 0
+    data_pieces, meta_pieces = [], []
+    for f in filelist:
+        ddf,mdf = read(f,profn0=profn)
+        data_pieces.append(ddf), meta_pieces.append(mdf)
+        profn = int(mdf['Prof#'].max())+1
+    data = pd.concat(data_pieces,ignore_index=True)
+    meta = pd.concat(meta_pieces,ignore_index=True)
+    return data, meta
 
-    #make directories...
-    for newdir in [meta_path,data_path]:
-        if not os.path.exists(newdir):
-            print newdir
-            os.makedirs(newdir)
 
-
-    # Save files
-    meta.to_csv(meta_path+ymdh+'.csv')
-
-    print meta
-    sys.exit()
-
-    #split up data by profiles
-    for name, group in data.groupby('Orb_Prof'):
-        group.to_csv(data_path+name+'.csv')
-
-if __name__ == '__main__':
-    #run some tests in the future....
-    print 'in read_one'
-
-    testfile = 'data/raw/MCS/MROM_2/2015/201502/20150201/2015020100_DDR.TAB'
-    save_data(testfile)
+if __name__=='__main__':
+    import sys
+    with open(sys.argv[1],'rb') as infile:
+        files = [x.rstrip() for x in infile.readlines()]
+        
+    ddf, mdf = combine(files)
+    
+    print mdf.tail()
+    
+    print ddf.tail()
