@@ -1,3 +1,13 @@
+#!env/bin python
+# Marek Slipski
+# 20180418
+# 20180419
+
+# read in list of MCS data files
+# create 2 dataframes, one for
+# data bout each profile and one
+# of data from each each profile
+
 import pandas as pd
 import numpy as np
 import sys

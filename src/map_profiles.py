@@ -1,3 +1,11 @@
+#!env/bin python
+# Marek Slipski
+# 20180418
+# 20180419
+
+# Plot latitude and local time of each
+# profile observation
+
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -36,7 +44,7 @@ def color_obs(obsqual):
 mdf['obs_col'] = mdf['Obs_qual'].apply(color_obs)
 
 plt.figure()
-plt.scatter(mdf['LTST']*24,mdf['Profile_lat'],color=list(mdf['obs_col']),s=5)
+plt.scatter(mdf['LTST']*24,mdf['Profile_lat'],color=list(mdf['obs_col']),s=8,alpha=0.5,lw=0)
 plt.xlabel('Local Time')
 plt.ylabel('Latitude')
 plt.xlim(0,24)
