@@ -17,6 +17,9 @@ python packages listed in `requirements.txt`. To install, run:
 
 `python src/findfiles.py YYYYMMDDHH YYYYMMDDHH > files.dat`
 
+### Split by latitude and local time
+`python src/splitby.py files.dat > profiles.dat`
+
 ### Open as DataFrame
 `python src/loadfiles.py files.dat`
 

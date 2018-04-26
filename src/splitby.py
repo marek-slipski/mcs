@@ -9,6 +9,7 @@
 # just those profiles
 
 import pandas as pd
+import yaml
 
 import loadfiles
 
@@ -16,10 +17,12 @@ import loadfiles
 ddf, mdf = loadfiles.ddf, loadfiles.mdf
 
 #SPLIT CONDITIONS (read from config file?)
-latmin=30.
-latmax=50.
-lstmin=13/24.
-lstmax=17/24.
+with open('src/config.yaml') as cy:
+    config = yaml.load(cy)
+latmin=config['latmin']
+latmax=config['latmax']
+lstmin=config['lstmin']/24.
+lstmax=config['lstmax']/24.
 
 latcond = (mdf['Profile_lat']>latmin) & (mdf['Profile_lat']<latmax)
 lstcond = (mdf['LTST']>lstmin) & (mdf['LTST']<lstmax)
