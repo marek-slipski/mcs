@@ -1,6 +1,1 @@
 data_path: 'data/raw/MCS/'
-
-latmin: 30
-latmax: 50
-lstmin: 13
-lstmax: 17

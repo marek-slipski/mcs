@@ -119,12 +119,29 @@ def combine(filelist):
     meta = pd.concat(meta_pieces,ignore_index=True)
     return data, meta
 
+def open_combine(infile):
+    with open(infile,'rb') as infl:
+        files =  [x.rstrip() for x in infl.readlines()]
+    return combine(files)
+
+def open_profs(infile,inprof):
+    ddf, mdf = open_combine(infile)
+    with open(inprof,'rb') as inp:
+        profiles = [x.rstrip() for x in inp.readlines()]
+    # reduce DataFrames
+    ddf = ddf[ddf['Prof#'].isin(profiles)]
+    mdf = mdf[mdf['Prof#'].isin(profiles)]
+    
+    return ddf, mdf
+        
 #############################################################
 #############################################################
 
-# OPEN FILES AND COMBINE
-with open(sys.argv[1],'rb') as infile:
-    files = [x.rstrip() for x in infile.readlines()]
 
-ddf, mdf = combine(files)
+if __name__=='__main__':
+    # OPEN FILES AND COMBINE
+    with open(sys.argv[1],'rb') as infile:
+        files = [x.rstrip() for x in infile.readlines()]
+
+    ddf, mdf = combine(files)
 

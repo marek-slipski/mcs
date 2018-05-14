@@ -1,32 +1,53 @@
 #!env/bin/ python
 # Marek Slipski
 # 20180419
+# 20180427
 
 # Need to be able to split by some criteria
-# lat/lst/long/etc.
-# and grab just those profiles in dataset
-# Then other scripts can take in argument and select
-# just those profiles
+# Redo this only open metadata
 
 import pandas as pd
 import yaml
+import argparse
 
 import loadfiles
 
-# Data and Meta DFs
-ddf, mdf = loadfiles.ddf, loadfiles.mdf
+# Not cyclic yet in LST
 
-#SPLIT CONDITIONS (read from config file?)
-with open('src/config.yaml') as cy:
-    config = yaml.load(cy)
-latmin=config['latmin']
-latmax=config['latmax']
-lstmin=config['lstmin']/24.
-lstmax=config['lstmax']/24.
+def find_between(meta,column,val1,val2):
+    cond = (meta[column]>val1) & (meta[column]<val2)
+    return meta[cond]
 
-latcond = (mdf['Profile_lat']>latmin) & (mdf['Profile_lat']<latmax)
-lstcond = (mdf['LTST']>lstmin) & (mdf['LTST']<lstmax)
-red_df = mdf[latcond&lstcond]
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description='To split MCS data by lat, lst, etc.')
+    parser.add_argument('files',
+                       help='File of list of MCS filenames to search through')
+    parser.add_argument('--lat',action='store',nargs=2,type=float,
+                       help='Latitude range (degrees) [-90, 90]')
+    parser.add_argument('--lst',action='store',nargs=2,type=float,
+                       help='Local Solar Time (hours) [0,24]')
+    parser.add_argument('--verbose','-v',action='store_true',
+                       help='Print out all profile numbers returned')
+    parser.add_argument('--save','-s',action='store',
+                       help='Save returned profile numbers')
+    
+    args = parser.parse_args()
+    
+    # Data and Meta DFs
+    ddf, mdf = loadfiles.open_combine(args.files)
 
-for prof in red_df['Prof#']:
-    print prof
+    # For each parameter, reduce the table
+    if args.lat:
+        mdf = find_between(mdf,'Profile_lat',args.lat[0],args.lat[1])
+    
+    if args.lst: 
+        mdf = find_between(mdf,'LTST',args.lst[0]/24,args.lst[1]/24)
+
+    if args.save:
+        with open(args.save,'wb') as sf:
+            print >> sf, "\n".join(str(prof) for prof in mdf['Prof#'])
+    
+    if args.verbose:
+        for prof in mdf['Prof#']:
+            print prof
