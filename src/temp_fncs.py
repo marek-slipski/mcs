@@ -1,18 +1,16 @@
 #!env/bin python
+# Marek Slipski
+# 20170629
 
 import pandas as pd
 import numpy as np
 
-import read_raw as rr
 
 ################################################################################
 # Functions to compute temperature and pressure from density profiles
 # ***** add a tempeature parser that takes species, snowden args, etc -
 # then I think the function arguments can be removed and those parsed values
 # will be global...
-#
-# Marek Slipski
-# 20170629
 ################################################################################
 
 #Some constants

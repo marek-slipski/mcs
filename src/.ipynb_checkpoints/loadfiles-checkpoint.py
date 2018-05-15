@@ -10,6 +10,7 @@
 
 import pandas as pd
 import numpy as np
+import argparse
 import sys
 
 #### READ AND COMBINE FUNCTIONS
@@ -112,7 +113,11 @@ def combine(filelist):
     profn = 0
     data_pieces, meta_pieces = [], []
     for f in filelist:
-        ddf,mdf = read(f,profn0=profn)
+        try:
+            ddf,mdf = read(f,profn0=profn)
+        except IOError,e:
+            print e
+            continue
         data_pieces.append(ddf), meta_pieces.append(mdf)
         profn = int(mdf['Prof#'].max())+1
     data = pd.concat(data_pieces,ignore_index=True)
@@ -132,6 +137,49 @@ def open_profs(infile,inprof):
     ddf = ddf[ddf['Prof#'].isin(profiles)]
     mdf = mdf[mdf['Prof#'].isin(profiles)]
     
+    return ddf, mdf
+
+
+def data_input_args():
+    parser = argparse.ArgumentParser(description='Determine input type')
+    parser.add_argument('files',nargs='+')
+    parser.add_argument('--type',action='store',choices=['fp','dfs'],
+                       help='fp: Input is list of files (plot all files) or \
+                       list of files and profile numbers to plot. \
+                       dfs: Input is DataFrame of data or DataFrames of \
+                       data and meta (will plot all profiles)')
+    parser.add_argument('--verbose','-v',action='store_true',
+                       help='Display information')
+    return parser
+
+def data_input_parse(args):
+    if not args.type:
+        if args.files[0].split('.')[-1] == 'csv':
+            if args.verbose:
+                print 'Assuming arguments are the data and not lists of files'
+            args.type = 'dfs'
+        else:
+            if args.verbose:
+                print 'Assuming arguments are lists of files and not data'
+            args.type = 'fp'
+
+    if args.type=='fp':
+        if len(args.files) == 1:
+            ddf, mdf = open_combine(args.files[0]) #open data and meta from all files
+        elif len(args.files) == 2:
+            ddf, mdf = open_profs(args.files[0],args.files[1]) #open and reduce
+        else:
+            sys.exit('Unrecognized third input. Try -h for help.')
+
+    elif args.type=='dfs':
+        ddf = pd.read_csv(args.files[0]) #open data from frist input
+        if len(args.files) == 1: #data already opened
+            pass
+        elif len(args.files) == 2: # use second file
+            mdf = pd.read_csv(args.files[1]) #open metadata
+        else:
+            sys.exit('Unrecognized third input. Try -h for help.')
+            
     return ddf, mdf
         
 #############################################################

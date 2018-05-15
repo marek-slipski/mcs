@@ -1,6 +1,7 @@
 #!env/bin python
 # Marek Slipski
 # 20180419
+# 20180515
 
 
 # Plot termperature vs. altitude (or Pressure) for each 
@@ -14,61 +15,30 @@ import matplotlib.pyplot as plt
 
 import loadfiles
 
+if __name__=='__main__':
+    parser = loadfiles.data_input_args() # enter files/profiles/data in command line
+    args = parser.parse_args() # get arguments
+    ddf, mdf = loadfiles.data_input_parse(args) # convert input data to DFs
 
-parser = argparse.ArgumentParser(
-    description='Determine input type')
-parser.add_argument('files',nargs='+')
-parser.add_argument('--type',action='store',choices=['fp','dfs'],
-                   help='fp: Input is list of files (plot all files) or \
-                   list of files and profile numbers to plot. \
-                   dfs: Input is DataFrame of data or DataFrames of \
-                   data and meta (will plot all profiles)')
-parser.add_argument('--verbose','-v',action='store_true',
-                   help='Display information')
 
-args = parser.parse_args()
+    yaxis = 'Alt'
 
-if not args.type:
-    if args.files[0].split('.')[-1] == 'csv':
-        if args.verbose:
-            print 'Assuming arguments are the data and not lists of files'
-        args.type = 'dfs'
-    else:
-        if args.verbose:
-            print 'Assuming arguments are lists of files and not data'
-        args.type = 'fp'
-
-if args.type=='fp':
-    if len(args.files) == 1:
-        ddf, mdf = loadfiles.open_combine(args.files[0]) #open data and meta from all files
-    elif len(args.files) == 2:
-        ddf, mdf = loadfiles.open_profs(args.files[0],args.files[1]) #open and reduce
-    else:
-        sys.exit('Unrecognized third input. Try -h for help.')
-        
-elif args.type=='dfs':
-    ddf = pd.read_csv(args.files[0]) #open data from frist input
-    if len(args.files) == 1: #data already opened
-        pass
-    elif len(args.files) == 2: # use second file
-        mdf = pd.read_csv(args.files[1]) #open metadata
-    else:
-        sys.exit('Unrecognized third input. Try -h for help.')
+    plt.figure()
     
-yaxis = 'Alt'
+    # Plot each profiles
+    for profnum, profdata in ddf.groupby('Prof#'):
+        plt.plot(profdata['T'],profdata[yaxis],color='gray',alpha=0.3,lw=0.5)
 
-plt.figure()
-for profnum, profdata in ddf.groupby('Prof#'):
-    plt.plot(profdata['T'],profdata[yaxis],color='gray',alpha=0.3,lw=0.5)
     
-plt.xlabel('Temperature [K]')
-if yaxis == 'Alt':
-    plt.ylabel('Altitude [km]')
-elif yaxis == 'Pres':
-    plt.ylabel('Pressure [Pa]')
-    plt.yscale('log')
-    plt.gca().invert_yaxis()
-    
-print 'Profiles shown:',len(mdf)    
+    # Axes
+    plt.xlabel('Temperature [K]')
+    if yaxis == 'Alt':
+        plt.ylabel('Altitude [km]')
+    elif yaxis == 'Pres':
+        plt.ylabel('Pressure [Pa]')
+        plt.yscale('log')
+        plt.gca().invert_yaxis()
 
-plt.show()
+    print 'Profiles shown:',len(mdf)    
+
+    plt.show() 

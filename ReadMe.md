@@ -9,9 +9,6 @@ python packages listed in `requirements.txt`. To install, run:
 
 `pip install -r requirements.txt`
 
-%## Download Data
-%Download raw MCS files using `src/download_files.py`.
-
 ## Data
 ### Get filenames in date range
 
@@ -27,4 +24,9 @@ python packages listed in `requirements.txt`. To install, run:
 `python src/map_profiles.py files.dat`
 
 ### Plot temperature profiles
-`python src/map_profiles.py files.dat`
+`python src/map_profiles.py files.dat profiles.dat` or
+`python src/map_profiles.py data.csv meta.csv`
+
+### Longitude-Altitude contours
+`python src/long_plots.py files.dat profiles.dat` or
+`python src/long_plots.py data.csv meta.csv`

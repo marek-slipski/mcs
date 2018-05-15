@@ -3,9 +3,6 @@
 
 # Data
 /data
-/months
 
 # Old files, not ready
 src/download_files.py
-src/build-table.py
-src/bin_by_lat.py
