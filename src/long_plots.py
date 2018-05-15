@@ -7,10 +7,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import argparse
 
+import loadfiles
+
 #import temp_fncs as tmp
 
-parser = argparse.ArgumentParser(
-    description='Determine input type')
+parser = argparse.ArgumentParser(description='Determine input type')
 parser.add_argument('files',nargs='+')
 parser.add_argument('--type',action='store',choices=['fp','dfs'],
                    help='fp: Input is list of files (plot all files) or \

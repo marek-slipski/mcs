@@ -1,5 +1,5 @@
 ## MCS
-To display and perform some basic actions with Mars Climate Database data.
+To perform some basic actions and display plots with Mars Climate Sounder L2 data.
 
 https://atmos.nmsu.edu/data_and_services/atmospheres_data/MARS/atmosphere_temp_prof.html
 
@@ -24,4 +24,7 @@ python packages listed in `requirements.txt`. To install, run:
 `python src/loadfiles.py files.dat`
 
 ### Plot map of observations
+`python src/map_profiles.py files.dat`
+
+### Plot temperature profiles
 `python src/map_profiles.py files.dat`

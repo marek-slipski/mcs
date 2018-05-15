@@ -3,6 +3,7 @@
 
 # Data
 /data
+/months
 
 # Old files, not ready
 src/download_files.py
