@@ -11,7 +11,13 @@
 import pandas as pd
 import numpy as np
 import argparse
+import yaml
 import sys
+
+## Get path to data from config file
+with open('src/config.yaml') as cy:
+    config = yaml.load(cy)
+path_base = config['data_path']
 
 #### READ AND COMBINE FUNCTIONS
 
@@ -112,7 +118,7 @@ def combine(filelist):
     '''
     profn = 0
     data_pieces, meta_pieces = [], []
-    for f in filelist:
+    for f in [path_base+x for x in filelist]:
         try:
             ddf,mdf = read(f,profn0=profn)
         except IOError,e:

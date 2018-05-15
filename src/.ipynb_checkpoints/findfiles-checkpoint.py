@@ -4,7 +4,7 @@ import datetime as dt
 ## Get path to data from config file
 with open('src/config.yaml') as cy:
     config = yaml.load(cy)
-path_base = config['data_path'] + 'MROM_2'
+path_base = config['data_path']
 
 def str_dt(date_st):
     '''
@@ -36,7 +36,8 @@ def file_from_date(file_dt):
     path_date = ''
     for ddir in ['%Y','%Y%m','%Y%m%d','%Y%m%d%H']:
         path_date += '/'+file_dt.strftime(ddir)
-    path_file = path_base + path_date + '_DDR.TAB'
+    #path_file = path_base + path_date + '_DDR.TAB'
+    path_file = path_date + '_DDR.TAB'
     return path_file
 
 def files_drange(start,end):

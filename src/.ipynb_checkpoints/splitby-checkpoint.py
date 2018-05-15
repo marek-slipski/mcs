@@ -31,6 +31,8 @@ if __name__ == '__main__':
                        help='Print out all profile numbers returned')
     parser.add_argument('--save','-s',action='store',
                        help='Save returned profile numbers')
+    parser.add_argument('--savecsv',action='store',
+                       help='Save DataFrames as csv')
     
     args = parser.parse_args()
     
@@ -47,6 +49,11 @@ if __name__ == '__main__':
     if args.save:
         with open(args.save,'wb') as sf:
             print >> sf, "\n".join(str(prof) for prof in mdf['Prof#'])
+            
+    if args.savecsv:
+        ddf = ddf[ddf['Prof#'].isin(mdf['Prof#'])]
+        ddf.to_csv(args.savecsv+'_data.csv',index=False)
+        mdf.to_csv(args.savecsv+'_meta.csv',index=False)
     
     if args.verbose:
         for prof in mdf['Prof#']:
