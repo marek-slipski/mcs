@@ -1,6 +1,7 @@
 #!env/bin python
 # Marek Slipski
 # 20180514
+# 20180516
 
 import pandas as pd
 import numpy as np
@@ -13,6 +14,8 @@ import loadfiles
 
 if __name__=='__main__':
     parser = loadfiles.data_input_args() # enter files/profiles/data in command line
+    parser.add_argument('-s','--save',action='store',
+                       help='Save figure as')
     args = parser.parse_args() # get arguments
     ddf, mdf = loadfiles.data_input_parse(args) # convert input data to DFs
 
@@ -69,22 +72,29 @@ if __name__=='__main__':
 
     # Create large plot
     lfig, lax = plt.subplots(2,2,figsize=(12,12))
+    # x and y limits
     y1 = 10
     y2 = 90
+    t1 = 120
+    t2 = 220
+    s1 = 0
+    s2 = 15
     
     # Temp Contour
-    ctc = lax[0,0].contourf(Yi_mean,Xi_mean,Z_mean)
-    lfig.colorbar(ctc,ax=lax[0,0],label='Temperature [K]')
+    ctc = lax[0,0].contourf(Yi_mean,Xi_mean,Z_mean,np.linspace(t1,t2,21),vmin=t1,vmax=t2)
+    tbar = lfig.colorbar(ctc,ax=lax[0,0],label='Temperature [K]')
     lax[0,0].set_xlabel(r'Longitude ($^{\circ}$)')
     lax[0,0].set_ylabel('Altitude [km]')
     lax[0,0].set_ylim(y1,y2)
+    lax[0,0].set_xlim(-181,181)
 
     # STD Contour
-    csc = lax[0,1].contourf(Yi_std,Xi_std,Z_std)
-    lfig.colorbar(csc,ax=lax[0,1],label='Standard Deviation [K]')
+    csc = lax[0,1].contourf(Yi_std,Xi_std,Z_std,np.linspace(s1,s2,16),vmin=s1,vmax=s2)
+    sbar = lfig.colorbar(csc,ax=lax[0,1],label='Standard Deviation [K]')
     lax[0,1].set_ylim(y1,y2)
     lax[0,1].set_xlabel(r'Longitude ($^{\circ}$)')
     lax[0,1].set_ylabel('Altitude [km]')
+    lax[0,1].set_xlim(-181,181)
     
     # Temp profiles
     styles = ['k','gray','cyan','b','r','lightcoral','darkorange','purple','yellow','seaborn']
@@ -107,12 +117,12 @@ if __name__=='__main__':
     
     #Axes
     lax[1,0].set_ylim(y1,y2)
-    lax[1,0].set_xlim(140,200)
+    lax[1,0].set_xlim(t1,t2)
     lax[1,0].set_xlabel('Temperature [K]')
     lax[1,0].set_ylabel('Altitude [km]')
     
     lax[1,1].set_ylim(y1,y2)
-    lax[1,1].set_xlim(0,15)
+    lax[1,1].set_xlim(s1,s2)
     lax[1,1].set_xlabel('Standard Deviation [K]')
     lax[1,1].set_ylabel('Altitude [km]')
     
@@ -176,6 +186,9 @@ if __name__=='__main__':
 
     #N2a.set_ylim(25,90)
     #N2a.set_xlim(.5e-4,2.e-4)
+    
+    if args.save:
+        plt.savefig(args.save,dpi=300)
 
 
     plt.show()

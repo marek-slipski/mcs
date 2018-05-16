@@ -11,9 +11,6 @@ import matplotlib.pyplot as plt
 
 import loadfiles
 
-# Data and Meta DFs
-ddf, mdf = loadfiles.ddf, loadfiles.mdf
-
 
 #Obs Qual colors
 def color_obs(obsqual):
@@ -40,14 +37,21 @@ def color_obs(obsqual):
     else:
         print 'Obs_qual not recognized'
         return 0
+
+if __name__=='__main__':
+    parser = loadfiles.data_input_args() # enter files/profiles/data in command line
+    parser.add_argument('-s','--save',action='store',
+                       help='Save figure as')
+    args = parser.parse_args() # get arguments
+    ddf, mdf = loadfiles.data_input_parse(args) # convert input data to DFs    
     
-mdf['obs_col'] = mdf['Obs_qual'].apply(color_obs)
+    mdf['obs_col'] = mdf['Obs_qual'].apply(color_obs)
 
-plt.figure()
-plt.scatter(mdf['LTST']*24,mdf['Profile_lat'],color=list(mdf['obs_col']),s=8,alpha=0.5,lw=0)
-plt.xlabel('Local Time')
-plt.ylabel('Latitude')
-plt.xlim(0,24)
-plt.ylim(-90,90)
+    plt.figure()
+    plt.scatter(mdf['LTST']*24,mdf['Profile_lat'],color=list(mdf['obs_col']),s=8,alpha=0.5,lw=0)
+    plt.xlabel('Local Time')
+    plt.ylabel('Latitude')
+    plt.xlim(0,24)
+    plt.ylim(-90,90)
 
-plt.show()
+    plt.show()

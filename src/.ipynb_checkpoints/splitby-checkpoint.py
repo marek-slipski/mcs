@@ -42,9 +42,11 @@ if __name__ == '__main__':
     # For each parameter, reduce the table
     if args.lat:
         mdf = find_between(mdf,'Profile_lat',args.lat[0],args.lat[1])
+        print mdf['Prof#']
     
     if args.lst: 
         mdf = find_between(mdf,'LTST',args.lst[0]/24,args.lst[1]/24)
+        print mdf['Prof#']
 
     if args.save:
         with open(args.save,'wb') as sf:
