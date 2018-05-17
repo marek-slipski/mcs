@@ -18,14 +18,15 @@ if __name__=='__main__':
                        help='Save figure as')
     args = parser.parse_args() # get arguments
     ddf, mdf = loadfiles.data_input_parse(args) # convert input data to DFs
-
+    
+    bin_num_lon = 16
     
     # SETUP BINS and midpoints
-    bins_lon = np.linspace(-180,180,16) #Longitude
+    bins_lon = np.linspace(-180,180,bin_num_lon) #Longitude
     mids_lon = (bins_lon[0:-1] + bins_lon[1:])/2
 
     #yaxis = 'Alt'
-    bins_alt = np.linspace(0,100,100) #Alitutde
+    bins_alt = np.linspace(0,100,50) #Alitutde
     mids_alt =  (bins_alt[0:-1] + bins_alt[1:])/2
 
     # Prep data
@@ -35,14 +36,11 @@ if __name__=='__main__':
     ddf['Lon_bin'] = pd.cut(ddf['Lon'],bins_lon,labels=mids_lon) #longitude
     counts_lon = pd.value_counts(ddf['Lon_bin'])
     ddf['Alt_bin'] = pd.cut(ddf['Alt'],bins_alt,labels=mids_alt) #altitude
-    counts_alt = pd.value_counts(ddf['Alt_bin'])
     # convert bin column mid point values to floats
     ddf[['Lon_bin','Alt_bin']] = ddf[['Lon_bin','Alt_bin']].apply(pd.to_numeric)
 
     # Calculate aggregates (means, stds, counts) in each bin
     binned_mean = ddf.groupby(['Lon_bin','Alt_bin'])['T'].mean()
-
-
 
     # Convert bins to 2d for contours
     # Mean
@@ -115,6 +113,16 @@ if __name__=='__main__':
         #sda.plot(ex['T'],ex['Alt_bin'])
         #N2a.plot(N2,tex['Alt_bin'])
     
+    # Means over all Longitudes
+    Tm = ddf.groupby('Alt_bin')['T'].mean()
+    Ts = ddf.groupby('Alt_bin')['T'].std()
+    Tsmean = sd_df.groupby('Alt_bin')['T'].mean()
+    diff = Ts - Tsmean
+    print diff[(diff.index<80)&(diff.index>20)].min(), diff[(diff.index<80)&(diff.index>20)].max(), diff[(diff.index<80)&(diff.index>20)].mean()
+    lax[1,0].plot(Tm,Tm.index,c='k',lw=3,ls='--')
+    lax[1,1].plot(Ts,Ts.index,'k',lw=3,ls='--')
+    lax[1,1].plot(Tsmean,Tsmean.index,'k',lw=3,ls=':')
+    
     #Axes
     lax[1,0].set_ylim(y1,y2)
     lax[1,0].set_xlim(t1,t2)
@@ -125,42 +133,7 @@ if __name__=='__main__':
     lax[1,1].set_xlim(s1,s2)
     lax[1,1].set_xlabel('Standard Deviation [K]')
     lax[1,1].set_ylabel('Altitude [km]')
-    
-    
-    # Plots
-    #plt.figure()
-    #plt.contourf(Yi_mean,Xi_mean,Z_mean)
-    #plt.colorbar()
-    #plt.xlabel('Longitude')
-    #plt.ylabel('Altitude')
 
-
-    
-    #plt.figure()
-    #plt.contourf(Yi_std,Xi_std,Z_std)
-    #plt.colorbar()
-    #plt.ylim(10,90)
-    #plt.xlabel('Longitude')
-    #plt.ylabel('Altitude')
-
-
-    
-
-    #sdf,sda=plt.subplots()
-    #tf,ta=plt.subplots()
-    #N2f, N2a = plt.subplots()
-
-    #for i in sd_df['Lon_bin'].unique():
-    #    ex = sd_df[sd_df['Lon_bin']==i]
-    #    sda.plot(ex['T'],ex['Alt_bin'])
-    #    tex = t_df[t_df['Lon_bin']==i].dropna()
-    #    dz = np.gradient(tex['Alt_bin']*1000)
-        #N2 = tmp.wB_freq(tex['Alt_bin']*1000,tex['T'])
-    #    ta.plot(tex['T'],tex['Alt_bin'])
-        #N2a.plot(N2,tex['Alt_bin'])
-
-    #for sh in [10,14,22,40]:
-    #    sda.plot(phi(sh),alts,'k--',alpha=0.3)
 
     #Tm = ddf.groupby('Alt_bin')['T'].mean()
     #Ts = ddf.groupby('Alt_bin')['T'].std()
@@ -173,19 +146,6 @@ if __name__=='__main__':
     #ta.plot(Tm,Tm.index,c='gray',lw=3)
     #ta.plot(Tmed,Tmed.index,'k',lw=3)
 
-
-    #sda.set_ylim(25,90)
-    #sda.set_xlim(0,15)
-    #sda.set_xlabel('Standard Deviation [K]')
-    #sda.set_ylabel('Altitude [km]')
-
-    #ta.set_ylim(25,90)
-    #ta.set_xlim(140,200)
-    #ta.set_xlabel('Temperature [K]')
-    #ta.set_ylabel('Altitude [km]')
-
-    #N2a.set_ylim(25,90)
-    #N2a.set_xlim(.5e-4,2.e-4)
     
     if args.save:
         plt.savefig(args.save,dpi=300)
