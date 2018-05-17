@@ -16,6 +16,8 @@ if __name__=='__main__':
     parser = loadfiles.data_input_args() # enter files/profiles/data in command line
     parser.add_argument('-s','--save',action='store',
                        help='Save figure as')
+    parser.add_argument('--hide',action='store_true',default=False,
+                       help='Hide figure')
     args = parser.parse_args() # get arguments
     ddf, mdf = loadfiles.data_input_parse(args) # convert input data to DFs
     
@@ -26,7 +28,7 @@ if __name__=='__main__':
     mids_lon = (bins_lon[0:-1] + bins_lon[1:])/2
 
     #yaxis = 'Alt'
-    bins_alt = np.linspace(0,100,50) #Alitutde
+    bins_alt = np.linspace(0,100,51) #Alitutde
     mids_alt =  (bins_alt[0:-1] + bins_alt[1:])/2
 
     # Prep data
@@ -118,7 +120,7 @@ if __name__=='__main__':
     Ts = ddf.groupby('Alt_bin')['T'].std()
     Tsmean = sd_df.groupby('Alt_bin')['T'].mean()
     diff = Ts - Tsmean
-    print diff[(diff.index<80)&(diff.index>20)].min(), diff[(diff.index<80)&(diff.index>20)].max(), diff[(diff.index<80)&(diff.index>20)].mean()
+    #print diff[(diff.index<80)&(diff.index>20)].min(), diff[(diff.index<80)&(diff.index>20)].max(), diff[(diff.index<80)&(diff.index>20)].mean()
     lax[1,0].plot(Tm,Tm.index,c='k',lw=3,ls='--')
     lax[1,1].plot(Ts,Ts.index,'k',lw=3,ls='--')
     lax[1,1].plot(Tsmean,Tsmean.index,'k',lw=3,ls=':')
@@ -151,4 +153,7 @@ if __name__=='__main__':
         plt.savefig(args.save,dpi=300)
 
 
-    plt.show()
+    if not args.hide:
+        plt.show()
+       
+    print Ts[Ts.index==59].values, Ts[Ts.index==69].values
