@@ -12,3 +12,4 @@ src/download_files.py
 src/*.pyc
 notebooks/.ipynb_checkpoints/*
 src/.ipynb_checkpoints/*
+maven_match/figs/.ipynb_checkpoints/*
