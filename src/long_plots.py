@@ -11,6 +11,12 @@ import loadfiles
 
 import temp_fncs as tmp
 
+#####################################################
+# Script to make contours of T, sig_T, and N^2 
+# as a function of Alt or Pressure
+#
+#####################################################
+
 def convert_2d(df,cols):
     '''
     Convert Grouped/Binned DataFrame to 2d array to use for
@@ -47,6 +53,9 @@ if __name__=='__main__':
                            help='Save figure as')
     plotparse.add_argument('--hide',action='store_true',default=False,
                            help='Hide figure')
+    plotparse.add_argument('-x','--xaxis',action='store',choices=['lat','lon','lst','Ls'],
+                           default='lon',
+                           help='X-axis units')
     plotparse.add_argument('-y','--yaxis',action='store',choices=['Alt','Pres'],default='Alt',
                            help='Y-axis units')
     plotparse.add_argument('--xbins',action='store',default=15,type=int,
@@ -57,17 +66,30 @@ if __name__=='__main__':
     
     ## LOAD DATA
     ddf, mdf = loadfiles.data_input_parse(args) # convert input data to DFs
+    mdf.set_index('Prof#',inplace=True)
         
-    ## Y-Axis Prep    
+    ## Axis Prep    
     ycol = args.yaxis # Alt or Pres column name
     ybincol = ycol+'_bin' # make bin in column name
     # Setup Y-axis plotting parameters
     yplot = {'Alt':{'label':'Altitude [km]','lim':[0,90],'scale':'linear'}, 
              'Pres':{'label':'Pressure [Pa]','lim':[1.e+3,5.e-3],'scale':'log'}}
     
+    xcol = args.xaxis
+    xnames = {'lon':'Lon','lst':'LTST','lat':'Lat','Ls':'L_s'} # conversion to actual col name
+    xshort = xnames[xcol] # shortcut to column name
+    xbins = {'lon':[-180,180],'lst':[0,1],'lat':[-90,90],'Ls':[0,360]} # bin ranges
+    xbincol = xshort+'_bin'
+    # Setup X-axis plotting parameters
+    xplot = {'lon':{'label':r'Longitude ($^{\circ}$)','lim':[-181,181]},
+             'lst':{'label':'Local Solar Time (hr/24)','lim':[-0.01,1.01]},
+             'lat':{'label':r'Latitude ($^{\circ}$)','lim':[-91,91]},
+             'Ls':{'label':r'$L_s$ ($^{\circ}$)','lim':[-1,361]}
+            }
+    
     ## SETUP BINS 
     # X-bins
-    bins_lon = np.linspace(-180,180,args.xbins+1) # longitude
+    bins_lon = np.linspace(xbins[xcol][0],xbins[xcol][1],args.xbins+1) # longitude
     mids_lon = (bins_lon[0:-1] + bins_lon[1:])/2 # midpoints
 
     # Y-bins
@@ -79,24 +101,28 @@ if __name__=='__main__':
         mids_y =  (bins_y[0:-1] + bins_y[1:])/2 # midpoints
 
     ## BIN DATA
-    ddf.dropna(subset=['T','Lon',ycol],inplace=True) # remove NaNs
+    if xcol == 'lst' or xcol == 'Ls':
+        ddf[xshort] = ddf['Prof#'].apply(lambda x: mdf.at[x,xshort])
+    ddf.dropna(subset=['T',xshort,ycol],inplace=True) # remove NaNs
+     
     # Add columns noting bins
-    ddf['Lon_bin'] = pd.cut(ddf['Lon'],bins_lon,labels=mids_lon) #longitude
+    ddf[xbincol] = pd.cut(ddf[xshort],bins_lon,labels=mids_lon) #longitude
     ddf[ybincol] = pd.cut(ddf[ycol],bins_y,labels=mids_y) # altitude
     # convert bin column mid point values to floats
-    ddf[['Lon_bin',ybincol]] = ddf[['Lon_bin',ybincol]].apply(pd.to_numeric)
-    # Calculate aggregates (means, stds, counts) in each bin
-    binned_mean = ddf.groupby(['Lon_bin',ybincol])['T'].mean() #temp 
-    alt_mean = ddf.groupby(['Lon_bin',ybincol])['Alt'].mean() #alt for N2
-    binned_N2 = tmp.wB_freq(alt_mean*1000,binned_mean) #N2
-    binned_sd = ddf.groupby(['Lon_bin',ybincol])['T'].std() #std
-    binned_count = ddf.groupby(['Lon_bin',ybincol])['T'].count() # counts
+    ddf[[xbincol,ybincol]] = ddf[[xbincol,ybincol]].apply(pd.to_numeric)
     
+    # Calculate aggregates (means, stds, counts) in each bin
+    binned_mean = ddf.groupby([xbincol,ybincol])['T'].mean() #temp 
+    alt_mean = ddf.groupby([xbincol,ybincol])['Alt'].mean() #alt for N2
+    binned_N2 = tmp.wB_freq(alt_mean*1000,binned_mean) #N2
+    binned_sd = ddf.groupby([xbincol,ybincol])['T'].std() #std
+    binned_count = ddf.groupby([xbincol,ybincol])['T'].count() # counts
+        
     # PREP FOR PLOTTING
-    Xi_mean, Yi_mean, Z_mean = convert_2d(binned_mean,['Lon_bin',ybincol]) #temp   
-    Xi_N2, Yi_N2, Z_N2 = convert_2d(binned_N2, ['Lon_bin',ybincol]) # N2
-    Xi_std, Yi_std, Z_std = convert_2d(binned_sd, ['Lon_bin',ybincol]) #std
-    Xi_count, Yi_count, Z_count = convert_2d(binned_count, ['Lon_bin',ybincol]) #couns
+    Xi_mean, Yi_mean, Z_mean = convert_2d(binned_mean,[xbincol,ybincol]) #temp   
+    Xi_N2, Yi_N2, Z_N2 = convert_2d(binned_N2, [xbincol,ybincol]) # N2
+    Xi_std, Yi_std, Z_std = convert_2d(binned_sd, [xbincol,ybincol]) #std
+    Xi_count, Yi_count, Z_count = convert_2d(binned_count, [xbincol,ybincol]) #couns
     
 
     # Create large plot
@@ -107,7 +133,7 @@ if __name__=='__main__':
     t2 = 220
     s1 = 0
     s2 = 15
-    c1 = 0
+    c1 = 30
     c2 = binned_count.max()
     Nm = 0.0*1.e+4
     Nx = 2.4e-4*1.e+4
@@ -116,44 +142,44 @@ if __name__=='__main__':
     # Temp Contour
     ctc = lax[0,0].contourf(Yi_mean,Xi_mean,Z_mean,np.linspace(t1,t2,21))
     tbar = lfig.colorbar(ctc,ax=lax[0,0],label='Temperature [K]')
-    lax[0,0].set_xlabel(r'Longitude ($^{\circ}$)')
+    lax[0,0].set_xlabel(xplot[xcol]['label'])
     lax[0,0].set_ylabel(yplot[ycol]['label'])
     lax[0,0].set_ylim(y1,y2)
     lax[0,0].set_yscale(yplot[ycol]['scale'])
-    lax[0,0].set_xlim(-181,181)
+    lax[0,0].set_xlim(xplot[xcol]['lim'])
 
     # STD Contour
     csc = lax[0,1].contourf(Yi_std,Xi_std,Z_std,np.linspace(s1,s2,16))
     sbar = lfig.colorbar(csc,ax=lax[0,1],label='Standard Deviation [K]')
     lax[0,1].set_ylim(y1,y2)
-    lax[0,1].set_xlabel(r'Longitude ($^{\circ}$)')
+    lax[0,1].set_xlabel(xplot[xcol]['label'])
     lax[0,1].set_ylabel(yplot[ycol]['label'])
     lax[0,1].set_yscale(yplot[ycol]['scale'])
-    lax[0,1].set_xlim(-181,181)
+    lax[0,1].set_xlim(xplot[xcol]['lim'])
     
     # N2 Contour
     cNc = lax[0,2].contourf(Yi_N2,Xi_N2,Z_N2*1.e+4,np.linspace(Nm,Nx,16))
     Nbar = lfig.colorbar(cNc,ax=lax[0,2],label=r'$N^2 x 1.0\times10^4$ [s$^{-2}$]')
     lax[0,2].set_ylim(y1,y2)
-    lax[0,2].set_xlabel(r'Longitude ($^{\circ}$)')
+    lax[0,2].set_xlabel(xplot[xcol]['label'])
     lax[0,2].set_ylabel(yplot[ycol]['label'])
     lax[0,2].set_yscale(yplot[ycol]['scale'])
-    lax[0,2].set_xlim(-181,181)
+    lax[0,2].set_xlim(xplot[xcol]['lim'])
     
     # Counts Contour
     ccc = lax[0,3].contourf(Yi_count,Xi_count,Z_count,np.linspace(c1,c2,16))
     cbar = lfig.colorbar(ccc,ax=lax[0,3],label='Number of Profiles')
     lax[0,3].set_ylim(y1,y2)
-    lax[0,3].set_xlabel(r'Longitude ($^{\circ}$)')
+    lax[0,3].set_xlabel(xplot[xcol]['label'])
     lax[0,3].set_ylabel(yplot[ycol]['label'])
     lax[0,3].set_yscale(yplot[ycol]['scale'])
-    lax[0,3].set_xlim(-181,181)
+    lax[0,3].set_xlim(xplot[xcol]['lim'])
     
     ## LOOP THROUGH INDIVIDUAL LONG BINS (BOTTOM ROW)
     # For individual bin profiles
     t_df = pd.DataFrame(binned_mean) # Temperature
     alt_df = pd.DataFrame(alt_mean) #alt for N^2
-    t_alt = pd.merge(t_df, alt_df,on=['Lon_bin',ybincol]) #alt and T for N^2
+    t_alt = pd.merge(t_df, alt_df,on=[xbincol,ybincol]) #alt and T for N^2
     t_df.reset_index(inplace=True)
     t_alt.reset_index(inplace=True)
     sd_df = pd.DataFrame(binned_sd) # Standard Deviations
@@ -162,13 +188,14 @@ if __name__=='__main__':
     c_df.reset_index(inplace=True)
     styles = ['k','gray','cyan','b','r','lightcoral','darkorange',
               'purple','yellow','seaborn']
-    for i,lon in enumerate(sd_df['Lon_bin'].unique()[1::2]):
+    for i,lon in enumerate(sd_df[xbincol].unique()[1::2]):
         # Draw vertical lines in contours
         lax[0,0].plot([lon,lon],[0,1000],color=styles[i],ls='--')
         lax[0,1].plot([lon,lon],[0,1000],color=styles[i],ls='--')
-        tex = t_df[t_df['Lon_bin']==lon].dropna() # temperature
-        altex = t_alt[t_alt['Lon_bin']==lon].dropna() # alt
-        sex = sd_df[sd_df['Lon_bin']==lon] # std
+        lax[0,2].plot([lon,lon],[0,1000],color=styles[i],ls='--')
+        tex = t_df[t_df[xbincol]==lon].dropna() # temperature
+        altex = t_alt[t_alt[xbincol]==lon].dropna() # alt
+        sex = sd_df[sd_df[xbincol]==lon] # std
         lax[1,0].plot(tex['T'],tex[ybincol],color=styles[i]) #plot T
         lax[1,1].plot(sex['T'],sex[ybincol],color=styles[i]) # plot STD
         # Calculate Brunt-Vaisalla Frequency

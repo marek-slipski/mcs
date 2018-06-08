@@ -63,12 +63,14 @@ def files_drange(start,end):
     return files
 
 if __name__ == '__main__':
-    import sys
-    start = sys.argv[1]
-    if len(sys.argv) > 2:
-        end = sys.argv[2]
-    else:
-        end = str(int(start) + 1)
+    import argparse
+    parser = argparse.ArgumentParser(description='Find MCS Files')
+    parser.add_argument('dates',nargs=2,
+                       help='Start and end dates to search between')
+    
+    args = parser.parse_args()
+    start = args.dates[0]
+    end = args.dates[1]
     
     files = files_drange(start,end)
     
