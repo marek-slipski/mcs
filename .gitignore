@@ -4,6 +4,9 @@
 # Data
 /data
 
+# Figs
+figs/
+
 # Old files, not ready
 src/download_files.py
 

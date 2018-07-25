@@ -1,8 +1,0 @@
-beautifulsoup4==4.6.0
-matplotlib==2.2.2
-numpy==1.14.2
-pandas==0.22.0
-pickleshare==0.7.4
-pyaml==17.12.1
-PyYAML==3.12
-
