@@ -53,7 +53,7 @@ if __name__=='__main__':
                            help='Save figure as')
     plotparse.add_argument('--hide',action='store_true',default=False,
                            help='Hide figure')
-    plotparse.add_argument('-x','--xaxis',action='store',choices=['lat','lon','lst','Ls'],
+    plotparse.add_argument('-x','--xaxis',action='store',choices=['lat','lon','lst','Ls','sza'],
                            default='lon',
                            help='X-axis units')
     plotparse.add_argument('-y','--yaxis',action='store',choices=['Alt','Pres'],default='Alt',
@@ -65,9 +65,10 @@ if __name__=='__main__':
     args = parser.parse_args() # get arguments
     
     ## LOAD DATA
+    print '==loading data'
     ddf, mdf = loadfiles.data_input_parse(args) # convert input data to DFs
     mdf.set_index('Prof#',inplace=True)
-        
+    
     ## Axis Prep    
     ycol = args.yaxis # Alt or Pres column name
     ybincol = ycol+'_bin' # make bin in column name
@@ -76,18 +77,20 @@ if __name__=='__main__':
              'Pres':{'label':'Pressure [Pa]','lim':[1.e+3,5.e-3],'scale':'log'}}
     
     xcol = args.xaxis
-    xnames = {'lon':'Lon','lst':'LTST','lat':'Lat','Ls':'L_s'} # conversion to actual col name
+    xnames = {'lon':'Lon','lst':'LTST','lat':'Lat','Ls':'L_s','sza':'Solar_zen'} # conversion to actual col name
     xshort = xnames[xcol] # shortcut to column name
-    xbins = {'lon':[-180,180],'lst':[0,1],'lat':[-90,90],'Ls':[0,360]} # bin ranges
+    xbins = {'lon':[-180,180],'lst':[0,1],'lat':[-90,90],'Ls':[0,360],'sza':[0,180]} # bin ranges
     xbincol = xshort+'_bin'
     # Setup X-axis plotting parameters
     xplot = {'lon':{'label':r'Longitude ($^{\circ}$)','lim':[-181,181]},
              'lst':{'label':'Local Solar Time (hr/24)','lim':[-0.01,1.01]},
              'lat':{'label':r'Latitude ($^{\circ}$)','lim':[-91,91]},
-             'Ls':{'label':r'$L_s$ ($^{\circ}$)','lim':[-1,361]}
+             'Ls':{'label':r'$L_s$ ($^{\circ}$)','lim':[-1,361]},
+             'sza':{'label':r'SZA ($^{\circ}$)','lim':[-1,181]}
             }
     
     ## SETUP BINS 
+    print '==binning'
     # X-bins
     bins_lon = np.linspace(xbins[xcol][0],xbins[xcol][1],args.xbins+1) # longitude
     mids_lon = (bins_lon[0:-1] + bins_lon[1:])/2 # midpoints
@@ -101,8 +104,9 @@ if __name__=='__main__':
         mids_y =  (bins_y[0:-1] + bins_y[1:])/2 # midpoints
 
     ## BIN DATA
-    if xcol == 'lst' or xcol == 'Ls':
+    if xcol == 'lst' or xcol == 'Ls' or xcol=='sza':
         ddf[xshort] = ddf['Prof#'].apply(lambda x: mdf.at[x,xshort])
+        
     ddf.dropna(subset=['T',xshort,ycol],inplace=True) # remove NaNs
      
     # Add columns noting bins
@@ -126,6 +130,7 @@ if __name__=='__main__':
     
 
     # Create large plot
+    print '==plotting contours'
     lfig, lax = plt.subplots(2,4,figsize=(22,9))
     # X and Y limits
     y1, y2 = yplot[ycol]['lim']
@@ -176,6 +181,7 @@ if __name__=='__main__':
     lax[0,3].set_xlim(xplot[xcol]['lim'])
     
     ## LOOP THROUGH INDIVIDUAL LONG BINS (BOTTOM ROW)
+    print '==plotting individual profiles'
     # For individual bin profiles
     t_df = pd.DataFrame(binned_mean) # Temperature
     alt_df = pd.DataFrame(alt_mean) #alt for N^2
@@ -241,6 +247,7 @@ if __name__=='__main__':
     
     # PLOTTING OPTIONS
     if args.save:
+        print '==saving figure'
         plt.savefig(args.save,dpi=300)
 
     if not args.hide:
