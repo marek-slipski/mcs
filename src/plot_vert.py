@@ -97,7 +97,8 @@ if __name__=='__main__':
 
     # Y-bins
     if ycol == 'Alt':
-        bins_y = np.linspace(ddf[ycol].min(),ddf[ycol].max(),args.ybins+1) # alitutde
+        #bins_y = np.linspace(ddf[ycol].min(),ddf[ycol].max(),args.ybins+1) # alitutde
+        bins_y = np.linspace(0,100,args.ybins+1) # alitutde
         mids_y =  (bins_y[0:-1] + bins_y[1:])/2 # midpoints
     else:
         bins_y = np.geomspace(ddf[ycol].min(),ddf[ycol].max(),args.ybins+1) # alitutde
@@ -108,6 +109,7 @@ if __name__=='__main__':
         ddf[xshort] = ddf['Prof#'].apply(lambda x: mdf.at[x,xshort])
         
     ddf.dropna(subset=['T',xshort,ycol],inplace=True) # remove NaNs
+    
      
     # Add columns noting bins
     ddf[xbincol] = pd.cut(ddf[xshort],bins_lon,labels=mids_lon) #longitude
@@ -121,6 +123,7 @@ if __name__=='__main__':
     binned_N2 = tmp.wB_freq(alt_mean*1000,binned_mean) #N2
     binned_sd = ddf.groupby([xbincol,ybincol])['T'].std() #std
     binned_count = ddf.groupby([xbincol,ybincol])['T'].count() # counts
+        
         
     # PREP FOR PLOTTING
     Xi_mean, Yi_mean, Z_mean = convert_2d(binned_mean,[xbincol,ybincol]) #temp   
@@ -183,10 +186,12 @@ if __name__=='__main__':
     ## LOOP THROUGH INDIVIDUAL LONG BINS (BOTTOM ROW)
     print '==plotting individual profiles'
     # For individual bin profiles
-    t_df = pd.DataFrame(binned_mean) # Temperature
-    alt_df = pd.DataFrame(alt_mean) #alt for N^2
+    
+    t_df = pd.DataFrame(binned_mean).reset_index() # Temperature
+    alt_df = pd.DataFrame(alt_mean).reset_index() #alt for N^2
+        
     t_alt = pd.merge(t_df, alt_df,on=[xbincol,ybincol]) #alt and T for N^2
-    t_df.reset_index(inplace=True)
+    #t_df.reset_index(inplace=True)
     t_alt.reset_index(inplace=True)
     sd_df = pd.DataFrame(binned_sd) # Standard Deviations
     sd_df.reset_index(inplace=True)
@@ -212,8 +217,8 @@ if __name__=='__main__':
     # Means over all Longitudes
     Tm = ddf.groupby(ybincol)['T'].mean() # temp over all
     Am = ddf.groupby(ybincol)['Alt'].mean() #salt over all
-    N2m = tmp.wB_freq(Am*1000,Tm) # N2 over all 
-    Ts = ddf.groupby(ybincol)['T'].std() # Std over all
+    N2m = tmp.wB_freq(Am*1000,Tm).reset_index() # N2 over all 
+    Ts = ddf.groupby(ybincol)['T'].std().reset_index() # Std over all
     Tsmean = sd_df.groupby(ybincol)['T'].mean() #mean of std bins
     diff = Ts - Tsmean # difference between std over all and mean std 
     
@@ -252,5 +257,8 @@ if __name__=='__main__':
 
     if not args.hide:
         plt.show()
-       
-    #print Ts[Ts.index==59].values, Ts[Ts.index==69].values
+        
+    #maxN2 = 2.1e-04    
+        
+    #print Ts[(Ts['Alt_bin']>=50) & (Ts['Alt_bin']<80)].mean()
+    #print N2m[0][(N2m['Alt_bin']>=50) & (N2m['Alt_bin']<80)].mean()/maxN2
