@@ -215,7 +215,7 @@ if __name__=='__main__':
         
     
     # Means over all Longitudes
-    Tm = ddf.groupby(ybincol)['T'].mean() # temp over all
+    Tm = ddf.groupby(ybincol)['T'].mean()# temp over all
     Am = ddf.groupby(ybincol)['Alt'].mean() #salt over all
     N2m = tmp.wB_freq(Am*1000,Tm).reset_index() # N2 over all 
     Ts = ddf.groupby(ybincol)['T'].std().reset_index() # Std over all
@@ -262,3 +262,6 @@ if __name__=='__main__':
         
     #print Ts[(Ts['Alt_bin']>=50) & (Ts['Alt_bin']<80)].mean()
     #print N2m[0][(N2m['Alt_bin']>=50) & (N2m['Alt_bin']<80)].mean()/maxN2
+    #print Tm.coulmns
+    Tm = Tm.reset_index()
+    print Tm[(Tm['Alt_bin']>=68) & (Tm['Alt_bin']<72)].mean()
