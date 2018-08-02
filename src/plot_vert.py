@@ -73,13 +73,13 @@ if __name__=='__main__':
     ycol = args.yaxis # Alt or Pres column name
     ybincol = ycol+'_bin' # make bin in column name
     # Setup Y-axis plotting parameters
-    yplot = {'Alt':{'label':'Altitude [km]','lim':[0,90],'scale':'linear'}, 
+    yplot = {'Alt':{'label':'Altitude [km]','lim':[0,80],'scale':'linear'}, 
              'Pres':{'label':'Pressure [Pa]','lim':[1.e+3,5.e-3],'scale':'log'}}
     
     xcol = args.xaxis
     xnames = {'lon':'Lon','lst':'LTST','lat':'Lat','Ls':'L_s','sza':'Solar_zen'} # conversion to actual col name
     xshort = xnames[xcol] # shortcut to column name
-    xbins = {'lon':[-180,180],'lst':[0,1],'lat':[-90,90],'Ls':[0,360],'sza':[0,180]} # bin ranges
+    xbins = {'lon':[-180,180],'lst':[0,1],'lat':[-90,90],'Ls':[-10,370],'sza':[0,180]} # bin ranges
     xbincol = xshort+'_bin'
     # Setup X-axis plotting parameters
     xplot = {'lon':{'label':r'Longitude ($^{\circ}$)','lim':[-181,181]},
@@ -137,14 +137,14 @@ if __name__=='__main__':
     lfig, lax = plt.subplots(2,4,figsize=(22,9))
     # X and Y limits
     y1, y2 = yplot[ycol]['lim']
-    t1 = 120
-    t2 = 220
+    t1 = 130
+    t2 = 240
     s1 = 0
-    s2 = 15
+    s2 = 10
     c1 = 30
     c2 = binned_count.max()
-    Nm = 0.0*1.e+4
-    Nx = 2.4e-4*1.e+4
+    Nm = 0.4e-4*1.e+4
+    Nx = 1.6e-4*1.e+4
     
     ## CONTOURS (TOP ROW)
     # Temp Contour
@@ -155,15 +155,17 @@ if __name__=='__main__':
     lax[0,0].set_ylim(y1,y2)
     lax[0,0].set_yscale(yplot[ycol]['scale'])
     lax[0,0].set_xlim(xplot[xcol]['lim'])
+    lax[0,0].text(xplot[xcol]['lim'][0]+20,y2-6,'a',fontsize=12)
 
     # STD Contour
-    csc = lax[0,1].contourf(Yi_std,Xi_std,Z_std,np.linspace(s1,s2,16))
+    csc = lax[0,1].contourf(Yi_std,Xi_std,Z_std,np.linspace(s1,s2,21))
     sbar = lfig.colorbar(csc,ax=lax[0,1],label='Standard Deviation [K]')
     lax[0,1].set_ylim(y1,y2)
     lax[0,1].set_xlabel(xplot[xcol]['label'])
     lax[0,1].set_ylabel(yplot[ycol]['label'])
     lax[0,1].set_yscale(yplot[ycol]['scale'])
     lax[0,1].set_xlim(xplot[xcol]['lim'])
+    lax[0,1].text(xplot[xcol]['lim'][0]+20,y2-6,'b',fontsize=12)
     
     # N2 Contour
     cNc = lax[0,2].contourf(Yi_N2,Xi_N2,Z_N2*1.e+4,np.linspace(Nm,Nx,16))
@@ -173,6 +175,7 @@ if __name__=='__main__':
     lax[0,2].set_ylabel(yplot[ycol]['label'])
     lax[0,2].set_yscale(yplot[ycol]['scale'])
     lax[0,2].set_xlim(xplot[xcol]['lim'])
+    lax[0,2].text(xplot[xcol]['lim'][0]+20,y2-6,'c',fontsize=12)
     
     # Counts Contour
     ccc = lax[0,3].contourf(Yi_count,Xi_count,Z_count,np.linspace(c1,c2,16))
@@ -198,12 +201,12 @@ if __name__=='__main__':
     c_df = pd.DataFrame(binned_count) # Counts
     c_df.reset_index(inplace=True)
     styles = ['k','gray','cyan','b','r','lightcoral','darkorange',
-              'purple','yellow','seaborn']
+              'purple','yellow','g'] + ['k']*20
     for i,lon in enumerate(sd_df[xbincol].unique()[1::2]):
         # Draw vertical lines in contours
-        lax[0,0].plot([lon,lon],[0,1000],color=styles[i],ls='--')
-        lax[0,1].plot([lon,lon],[0,1000],color=styles[i],ls='--')
-        lax[0,2].plot([lon,lon],[0,1000],color=styles[i],ls='--')
+        #lax[0,0].plot([lon,lon],[0,1000],color=styles[i],ls='--')
+        #lax[0,1].plot([lon,lon],[0,1000],color=styles[i],ls='--')
+        #lax[0,2].plot([lon,lon],[0,1000],color=styles[i],ls='--')
         tex = t_df[t_df[xbincol]==lon].dropna() # temperature
         altex = t_alt[t_alt[xbincol]==lon].dropna() # alt
         sex = sd_df[sd_df[xbincol]==lon] # std
