@@ -73,18 +73,18 @@ if __name__=='__main__':
     ycol = args.yaxis # Alt or Pres column name
     ybincol = ycol+'_bin' # make bin in column name
     # Setup Y-axis plotting parameters
-    yplot = {'Alt':{'label':'Altitude [km]','lim':[0,80],'scale':'linear'}, 
+    yplot = {'Alt':{'label':'Altitude [km]','lim':[0,100],'scale':'linear'}, 
              'Pres':{'label':'Pressure [Pa]','lim':[1.e+3,5.e-3],'scale':'log'}}
     
     xcol = args.xaxis
     xnames = {'lon':'Lon','lst':'LTST','lat':'Lat','Ls':'L_s','sza':'Solar_zen'} # conversion to actual col name
     xshort = xnames[xcol] # shortcut to column name
-    xbins = {'lon':[-180,180],'lst':[0,1],'lat':[-90,90],'Ls':[-10,370],'sza':[0,180]} # bin ranges
+    xbins = {'lon':[-180,180],'lst':[0,1],'lat':[30,90],'Ls':[-10,370],'sza':[0,180]} # bin ranges
     xbincol = xshort+'_bin'
     # Setup X-axis plotting parameters
     xplot = {'lon':{'label':r'Longitude ($^{\circ}$)','lim':[-181,181]},
              'lst':{'label':'Local Solar Time (hr/24)','lim':[-0.01,1.01]},
-             'lat':{'label':r'Latitude ($^{\circ}$)','lim':[-91,91]},
+             'lat':{'label':r'Latitude ($^{\circ}$)','lim':[29,91]},
              'Ls':{'label':r'$L_s$ ($^{\circ}$)','lim':[-1,361]},
              'sza':{'label':r'SZA ($^{\circ}$)','lim':[-1,181]}
             }
@@ -138,13 +138,13 @@ if __name__=='__main__':
     # X and Y limits
     y1, y2 = yplot[ycol]['lim']
     t1 = 130
-    t2 = 240
+    t2 = 215
     s1 = 0
-    s2 = 10
+    s2 = 20
     c1 = 30
     c2 = binned_count.max()
     Nm = 0.4e-4*1.e+4
-    Nx = 1.6e-4*1.e+4
+    Nx = 2.5e-4*1.e+4
     
     ## CONTOURS (TOP ROW)
     # Temp Contour
@@ -256,7 +256,7 @@ if __name__=='__main__':
     # PLOTTING OPTIONS
     if args.save:
         print '==saving figure'
-        plt.savefig(args.save,dpi=300)
+        plt.savefig(args.save,dpi=500)
 
     if not args.hide:
         plt.show()
