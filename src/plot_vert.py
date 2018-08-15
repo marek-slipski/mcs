@@ -79,12 +79,12 @@ if __name__=='__main__':
     xcol = args.xaxis
     xnames = {'lon':'Lon','lst':'LTST','lat':'Lat','Ls':'L_s','sza':'Solar_zen'} # conversion to actual col name
     xshort = xnames[xcol] # shortcut to column name
-    xbins = {'lon':[-180,180],'lst':[0,1],'lat':[30,90],'Ls':[-10,370],'sza':[0,180]} # bin ranges
+    xbins = {'lon':[-180,180],'lst':[0,1],'lat':[-90,90],'Ls':[-10,370],'sza':[0,180]} # bin ranges
     xbincol = xshort+'_bin'
     # Setup X-axis plotting parameters
     xplot = {'lon':{'label':r'Longitude ($^{\circ}$)','lim':[-181,181]},
              'lst':{'label':'Local Solar Time (hr/24)','lim':[-0.01,1.01]},
-             'lat':{'label':r'Latitude ($^{\circ}$)','lim':[29,91]},
+             'lat':{'label':r'Latitude ($^{\circ}$)','lim':[-91,91]},
              'Ls':{'label':r'$L_s$ ($^{\circ}$)','lim':[-1,361]},
              'sza':{'label':r'SZA ($^{\circ}$)','lim':[-1,181]}
             }
@@ -137,8 +137,8 @@ if __name__=='__main__':
     lfig, lax = plt.subplots(2,4,figsize=(22,9))
     # X and Y limits
     y1, y2 = yplot[ycol]['lim']
-    t1 = 130
-    t2 = 215
+    t1 = 110
+    t2 = 250
     s1 = 0
     s2 = 20
     c1 = 30
