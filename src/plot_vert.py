@@ -60,7 +60,7 @@ if __name__=='__main__':
                            help='Y-axis units')
     plotparse.add_argument('--xbins',action='store',default=15,type=int,
                            help='Number of bins in x (default=16)')
-    plotparse.add_argument('--ybins',action='store',default=50,type=int,
+    plotparse.add_argument('--ybins',action='store',default=20,type=int,
                            help='Number of bins in y [Alt/Pres] (default=50)')
     args = parser.parse_args() # get arguments
     
@@ -98,7 +98,8 @@ if __name__=='__main__':
     # Y-bins
     if ycol == 'Alt':
         #bins_y = np.linspace(ddf[ycol].min(),ddf[ycol].max(),args.ybins+1) # alitutde
-        bins_y = np.linspace(0,100,args.ybins+1) # alitutde
+        #bins_y = np.linspace(0,100,args.ybins+1) # alitutde
+        bins_y = np.arange(0,105,5) # alitutde
         mids_y =  (bins_y[0:-1] + bins_y[1:])/2 # midpoints
     else:
         bins_y = np.geomspace(ddf[ycol].min(),ddf[ycol].max(),args.ybins+1) # alitutde
@@ -204,9 +205,9 @@ if __name__=='__main__':
               'purple','yellow','g'] + ['k']*20
     for i,lon in enumerate(sd_df[xbincol].unique()[1::2]):
         # Draw vertical lines in contours
-        #lax[0,0].plot([lon,lon],[0,1000],color=styles[i],ls='--')
-        #lax[0,1].plot([lon,lon],[0,1000],color=styles[i],ls='--')
-        #lax[0,2].plot([lon,lon],[0,1000],color=styles[i],ls='--')
+        lax[0,0].plot([lon,lon],[0,1000],color=styles[i],ls='--')
+        lax[0,1].plot([lon,lon],[0,1000],color=styles[i],ls='--')
+        lax[0,2].plot([lon,lon],[0,1000],color=styles[i],ls='--')
         tex = t_df[t_df[xbincol]==lon].dropna() # temperature
         altex = t_alt[t_alt[xbincol]==lon].dropna() # alt
         sex = sd_df[sd_df[xbincol]==lon] # std
@@ -235,7 +236,7 @@ if __name__=='__main__':
     lax[1,0].set_yscale(yplot[ycol]['scale'])
     
     # STANDARD DEVIATIONS
-    lax[1,1].plot(Ts,Ts.index,'k',lw=3,ls='--') # std over all long
+    #lax[1,1].plot(Ts,Ts.index,'k',lw=3,ls='--') # std over all long
     lax[1,1].plot(Tsmean,Tsmean.index,'k',lw=3,ls=':') # mean std over bins
     lax[1,1].set_ylim(y1,y2)
     lax[1,1].set_xlim(s1,s2)
@@ -267,4 +268,4 @@ if __name__=='__main__':
     #print N2m[0][(N2m['Alt_bin']>=50) & (N2m['Alt_bin']<80)].mean()/maxN2
     #print Tm.coulmns
     Tm = Tm.reset_index()
-    print Tm[(Tm['Alt_bin']>=68) & (Tm['Alt_bin']<72)].mean()
+    #print Tm[(Tm['Alt_bin']>=68) & (Tm['Alt_bin']<72)].mean()
