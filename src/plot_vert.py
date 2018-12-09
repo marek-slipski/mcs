@@ -141,10 +141,10 @@ if __name__=='__main__':
     t1 = 110
     t2 = 250
     s1 = 0
-    s2 = 20
+    s2 = 15
     c1 = 30
     c2 = binned_count.max()
-    Nm = 0.4e-4*1.e+4
+    Nm = .4e-4*1.e+4
     Nx = 2.5e-4*1.e+4
     
     ## CONTOURS (TOP ROW)
@@ -205,9 +205,9 @@ if __name__=='__main__':
               'purple','yellow','g'] + ['k']*20
     for i,lon in enumerate(sd_df[xbincol].unique()[1::2]):
         # Draw vertical lines in contours
-        lax[0,0].plot([lon,lon],[0,1000],color=styles[i],ls='--')
-        lax[0,1].plot([lon,lon],[0,1000],color=styles[i],ls='--')
-        lax[0,2].plot([lon,lon],[0,1000],color=styles[i],ls='--')
+        #lax[0,0].plot([lon,lon],[0,1000],color=styles[i],ls='--')
+        #lax[0,1].plot([lon,lon],[0,1000],color=styles[i],ls='--')
+        #lax[0,2].plot([lon,lon],[0,1000],color=styles[i],ls='--')
         tex = t_df[t_df[xbincol]==lon].dropna() # temperature
         altex = t_alt[t_alt[xbincol]==lon].dropna() # alt
         sex = sd_df[sd_df[xbincol]==lon] # std
