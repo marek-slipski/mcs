@@ -4,18 +4,15 @@
 # Data
 /data
 
-# Figs
+# Local files
+config.local
 figs/
-
-# Old files, not ready
-src/download_files.py
-
-# Playground
 playground/
 
-# checkpoints and piece
+# checkpoints
 .ipynb_checkpoints
 src/*.pyc
 notebooks/.ipynb_checkpoints/*
 src/.ipynb_checkpoints/*
 maven_match/figs/.ipynb_checkpoints/*
+*.pyc

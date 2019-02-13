@@ -39,7 +39,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     ## Get path to data from config file
-    with open('src/config.yaml') as cy:
+    with open('config.local') as cy:
         config = yaml.load(cy)
     path_base = config['data_path']
     with open(args.files,'rb') as inputfile:

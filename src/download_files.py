@@ -4,15 +4,19 @@ import HTMLParser
 import requests
 import os
 import glob
+import yaml
 
 from pandas import DataFrame, Series
 import pandas as pd
 import numpy as np
 import datetime as dt
 
-###################################
-########## WORKS ##################
-###################################
+
+## Get path to data from config file
+with open('config.local') as cy:
+    config = yaml.load(cy)
+path_base = config['data_path']
+
 def download_day_files(year,month,day,datar='DDR'):
     '''
     Download a single Earth-day's worth of MCS data (6 '.TAB' files)
@@ -76,7 +80,7 @@ def download_day_files(year,month,day,datar='DDR'):
     for name, link in unames:
         reqlink = urllib2.Request(link)
         oplink = urllib2.urlopen(reqlink)  #open link
-        new_loc = 'data/raw/MCS/'+mrom[0:6]+'/'+dirname #save location
+        new_loc = path_base+'/'+mrom[0:6]+'/'+dirname #save location
         if not os.path.exists(new_loc):
             os.makedirs(new_loc) #create directorie if necessary
         new_name = new_loc+'/'+name #attach filename to location
@@ -114,4 +118,4 @@ def download_files(
     return file_count
 
 if __name__=='__main__':
-    download_files(2015,2,1,2016,12,31)
+    download_files(2016,10,1,2016,10,31)
