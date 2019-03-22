@@ -1,10 +1,11 @@
 from bs4 import BeautifulSoup as BS
-import urllib2
-import HTMLParser
+import urllib
+#import HTMLParser
 import requests
 import os
 import glob
 import yaml
+import sys
 
 from pandas import DataFrame, Series
 import pandas as pd
@@ -16,6 +17,8 @@ import datetime as dt
 with open('config.local') as cy:
     config = yaml.load(cy)
 path_base = config['data_path']
+
+#http = urllib3.PoolManager()
 
 def download_day_files(year,month,day,datar='DDR'):
     '''
@@ -78,8 +81,11 @@ def download_day_files(year,month,day,datar='DDR'):
     #Download each file to similar volume structre
     file_count = 0
     for name, link in unames:
-        reqlink = urllib2.Request(link)
-        oplink = urllib2.urlopen(reqlink)  #open link
+        oplink = urllib.request.urlopen(link)
+        #print(html)
+        #reqlink = http.request('GET', link)
+        #print(reqlink)
+        #oplink = urllib3.urlopen(reqlink)  #open link
         new_loc = path_base+'/'+mrom[0:6]+'/'+dirname #save location
         if not os.path.exists(new_loc):
             os.makedirs(new_loc) #create directorie if necessary
@@ -111,11 +117,11 @@ def download_files(
     date = dt.datetime(start_year,start_month,start_day)
     file_count = 0 #initialize file count
     while (date >= sd) and (date <= ed): #do for each day
-        print date
+        print(date)
         file_count += download_day_files(date.year,date.month,date.day)
         date += dt.timedelta(1) #advance to next day
-    print 'Number of files downloaded:',file_count
+    print('Number of files downloaded:',file_count)
     return file_count
 
 if __name__=='__main__':
-    download_files(2016,10,1,2016,10,31)
+    download_files(2016,2,8,2016,12,31)
